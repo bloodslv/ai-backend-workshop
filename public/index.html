@@ -78,25 +78,34 @@
             <div class="endpoint">
                 <span class="method get">GET</span>
                 <code>/api/v1/users</code>
-                <p>Get all users</p>
+                <p>Get all users with their profile information (first name, last name, email, phone, membership details)</p>
             </div>
             
             <div class="endpoint">
                 <span class="method get">GET</span>
                 <code>/api/v1/users/:id</code>
-                <p>Get a specific user by ID</p>
+                <p>Get a specific user by ID with full profile details</p>
             </div>
             
             <div class="endpoint">
                 <span class="method post">POST</span>
                 <code>/api/v1/users</code>
-                <p>Create a new user (send JSON: {"name": "Name", "email": "email@example.com"})</p>
+                <p>Create a new user (send JSON with: first_name, last_name, email, phone, membership_type, points)</p>
+                <pre style="background: #f8f9fa; padding: 8px; margin-top: 8px; font-size: 12px;">
+{
+  "first_name": "สมชาย",
+  "last_name": "ใจดี", 
+  "email": "somchai@example.com",
+  "phone": "081-234-5678",
+  "membership_type": "Gold",
+  "points": 15420
+}</pre>
             </div>
             
             <div class="endpoint">
                 <span class="method put">PUT</span>
                 <code>/api/v1/users/:id</code>
-                <p>Update a user (send JSON: {"name": "New Name", "email": "newemail@example.com"})</p>
+                <p>Update user information (partial updates allowed)</p>
             </div>
             
             <div class="endpoint">
