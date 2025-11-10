@@ -1,0 +1,681 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>config: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">kbtg.tech/ai-backend-workshop/internal/config/config.go (100.0%)</option>
+				
+				<option value="file1">kbtg.tech/ai-backend-workshop/internal/handler/user_handler.go (77.6%)</option>
+				
+				<option value="file2">kbtg.tech/ai-backend-workshop/internal/mocks/user_mocks.go (96.9%)</option>
+				
+				<option value="file3">kbtg.tech/ai-backend-workshop/internal/repository/user_repository.go (84.0%)</option>
+				
+				<option value="file4">kbtg.tech/ai-backend-workshop/internal/usecase/user_usecase.go (72.3%)</option>
+				
+				<option value="file5">kbtg.tech/ai-backend-workshop/pkg/database/database.go (5.6%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package config
+
+import (
+        "os"
+)
+
+// Config holds application configuration
+type Config struct {
+        Port      string
+        DBPath    string
+        AppName   string
+        DebugMode bool
+}
+
+// NewConfig creates a new configuration instance
+func NewConfig() *Config <span class="cov8" title="1">{
+        return &amp;Config{
+                Port:      getEnv("PORT", "3000"),
+                DBPath:    getEnv("DB_PATH", "users.db"),
+                AppName:   getEnv("APP_NAME", "KBTG AI Backend Workshop"),
+                DebugMode: getEnv("DEBUG", "false") == "true",
+        }
+}</span>
+
+// getEnv gets an environment variable or returns a default value
+func getEnv(key, defaultValue string) string <span class="cov8" title="1">{
+        if value := os.Getenv(key); value != "" </span><span class="cov8" title="1">{
+                return value
+        }</span>
+        <span class="cov8" title="1">return defaultValue</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package handler
+
+import (
+        "strconv"
+
+        "github.com/gofiber/fiber/v2"
+        "kbtg.tech/ai-backend-workshop/internal/domain"
+)
+
+// UserHandler handles HTTP requests for user operations
+type UserHandler struct {
+        userUseCase domain.UserUseCase
+}
+
+// NewUserHandler creates a new user handler
+func NewUserHandler(userUseCase domain.UserUseCase) *UserHandler <span class="cov8" title="1">{
+        return &amp;UserHandler{
+                userUseCase: userUseCase,
+        }
+}</span>
+
+// GetUsers handles GET /users
+func (h *UserHandler) GetUsers(c *fiber.Ctx) error <span class="cov8" title="1">{
+        users, err := h.userUseCase.GetAllUsers()
+        if err != nil </span><span class="cov8" title="1">{
+                return c.Status(500).JSON(fiber.Map{
+                        "error": "Failed to retrieve users",
+                })
+        }</span>
+
+        <span class="cov8" title="1">return c.JSON(fiber.Map{
+                "data":  users,
+                "count": len(users),
+        })</span>
+}
+
+// GetUser handles GET /users/:id
+func (h *UserHandler) GetUser(c *fiber.Ctx) error <span class="cov8" title="1">{
+        idParam := c.Params("id")
+        id, err := strconv.ParseUint(idParam, 10, 32)
+        if err != nil </span><span class="cov8" title="1">{
+                return c.Status(400).JSON(fiber.Map{
+                        "error": "Invalid user ID",
+                })
+        }</span>
+
+        <span class="cov8" title="1">user, err := h.userUseCase.GetUserByID(uint(id))
+        if err != nil </span><span class="cov8" title="1">{
+                if err.Error() == "user not found" </span><span class="cov8" title="1">{
+                        return c.Status(404).JSON(fiber.Map{
+                                "error": "User not found",
+                        })
+                }</span>
+                <span class="cov0" title="0">return c.Status(500).JSON(fiber.Map{
+                        "error": "Failed to retrieve user",
+                })</span>
+        }
+
+        <span class="cov8" title="1">return c.JSON(fiber.Map{
+                "data": user,
+        })</span>
+}
+
+// CreateUser handles POST /users
+func (h *UserHandler) CreateUser(c *fiber.Ctx) error <span class="cov8" title="1">{
+        var req domain.CreateUserRequest
+        if err := c.BodyParser(&amp;req); err != nil </span><span class="cov8" title="1">{
+                return c.Status(400).JSON(fiber.Map{
+                        "error": "Invalid request body",
+                })
+        }</span>
+
+        <span class="cov8" title="1">user, err := h.userUseCase.CreateUser(req)
+        if err != nil </span><span class="cov8" title="1">{
+                if err.Error() == "first name, last name, and email are required" ||
+                        err.Error() == "user with this email already exists" </span><span class="cov8" title="1">{
+                        return c.Status(400).JSON(fiber.Map{
+                                "error": err.Error(),
+                        })
+                }</span>
+                <span class="cov0" title="0">return c.Status(500).JSON(fiber.Map{
+                        "error": "Failed to create user",
+                })</span>
+        }
+
+        <span class="cov8" title="1">return c.Status(201).JSON(fiber.Map{
+                "data": user,
+        })</span>
+}
+
+// UpdateUser handles PUT /users/:id
+func (h *UserHandler) UpdateUser(c *fiber.Ctx) error <span class="cov8" title="1">{
+        idParam := c.Params("id")
+        id, err := strconv.ParseUint(idParam, 10, 32)
+        if err != nil </span><span class="cov0" title="0">{
+                return c.Status(400).JSON(fiber.Map{
+                        "error": "Invalid user ID",
+                })
+        }</span>
+
+        <span class="cov8" title="1">var req domain.UpdateUserRequest
+        if err := c.BodyParser(&amp;req); err != nil </span><span class="cov0" title="0">{
+                return c.Status(400).JSON(fiber.Map{
+                        "error": "Invalid request body",
+                })
+        }</span>
+
+        <span class="cov8" title="1">user, err := h.userUseCase.UpdateUser(uint(id), req)
+        if err != nil </span><span class="cov0" title="0">{
+                if err.Error() == "user not found" </span><span class="cov0" title="0">{
+                        return c.Status(404).JSON(fiber.Map{
+                                "error": "User not found",
+                        })
+                }</span>
+                <span class="cov0" title="0">if err.Error() == "user with this email already exists" </span><span class="cov0" title="0">{
+                        return c.Status(400).JSON(fiber.Map{
+                                "error": err.Error(),
+                        })
+                }</span>
+                <span class="cov0" title="0">return c.Status(500).JSON(fiber.Map{
+                        "error": "Failed to update user",
+                })</span>
+        }
+
+        <span class="cov8" title="1">return c.JSON(fiber.Map{
+                "data": user,
+        })</span>
+}
+
+// DeleteUser handles DELETE /users/:id
+func (h *UserHandler) DeleteUser(c *fiber.Ctx) error <span class="cov8" title="1">{
+        idParam := c.Params("id")
+        id, err := strconv.ParseUint(idParam, 10, 32)
+        if err != nil </span><span class="cov0" title="0">{
+                return c.Status(400).JSON(fiber.Map{
+                        "error": "Invalid user ID",
+                })
+        }</span>
+
+        <span class="cov8" title="1">err = h.userUseCase.DeleteUser(uint(id))
+        if err != nil </span><span class="cov8" title="1">{
+                if err.Error() == "user not found" </span><span class="cov8" title="1">{
+                        return c.Status(404).JSON(fiber.Map{
+                                "error": "User not found",
+                        })
+                }</span>
+                <span class="cov0" title="0">return c.Status(500).JSON(fiber.Map{
+                        "error": "Failed to delete user",
+                })</span>
+        }
+
+        <span class="cov8" title="1">return c.JSON(fiber.Map{
+                "message": "User deleted successfully",
+        })</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package mocks
+
+import (
+        "kbtg.tech/ai-backend-workshop/internal/domain"
+        "github.com/stretchr/testify/mock"
+)
+
+// MockUserRepository is a mock implementation of domain.UserRepository
+type MockUserRepository struct {
+        mock.Mock
+}
+
+func (m *MockUserRepository) GetAll() ([]domain.User, error) <span class="cov8" title="1">{
+        args := m.Called()
+        return args.Get(0).([]domain.User), args.Error(1)
+}</span>
+
+func (m *MockUserRepository) GetByID(id uint) (*domain.User, error) <span class="cov8" title="1">{
+        args := m.Called(id)
+        if args.Get(0) == nil </span><span class="cov8" title="1">{
+                return nil, args.Error(1)
+        }</span>
+        <span class="cov8" title="1">return args.Get(0).(*domain.User), args.Error(1)</span>
+}
+
+func (m *MockUserRepository) GetByEmail(email string) (*domain.User, error) <span class="cov8" title="1">{
+        args := m.Called(email)
+        if args.Get(0) == nil </span><span class="cov8" title="1">{
+                return nil, args.Error(1)
+        }</span>
+        <span class="cov8" title="1">return args.Get(0).(*domain.User), args.Error(1)</span>
+}
+
+func (m *MockUserRepository) Create(user *domain.User) error <span class="cov8" title="1">{
+        args := m.Called(user)
+        return args.Error(0)
+}</span>
+
+func (m *MockUserRepository) Update(user *domain.User) error <span class="cov8" title="1">{
+        args := m.Called(user)
+        return args.Error(0)
+}</span>
+
+func (m *MockUserRepository) Delete(id uint) error <span class="cov8" title="1">{
+        args := m.Called(id)
+        return args.Error(0)
+}</span>
+
+// MockUserUseCase is a mock implementation of domain.UserUseCase
+type MockUserUseCase struct {
+        mock.Mock
+}
+
+func (m *MockUserUseCase) GetAllUsers() ([]domain.User, error) <span class="cov8" title="1">{
+        args := m.Called()
+        return args.Get(0).([]domain.User), args.Error(1)
+}</span>
+
+func (m *MockUserUseCase) GetUserByID(id uint) (*domain.User, error) <span class="cov8" title="1">{
+        args := m.Called(id)
+        if args.Get(0) == nil </span><span class="cov8" title="1">{
+                return nil, args.Error(1)
+        }</span>
+        <span class="cov8" title="1">return args.Get(0).(*domain.User), args.Error(1)</span>
+}
+
+func (m *MockUserUseCase) CreateUser(req domain.CreateUserRequest) (*domain.User, error) <span class="cov8" title="1">{
+        args := m.Called(req)
+        if args.Get(0) == nil </span><span class="cov8" title="1">{
+                return nil, args.Error(1)
+        }</span>
+        <span class="cov8" title="1">return args.Get(0).(*domain.User), args.Error(1)</span>
+}
+
+func (m *MockUserUseCase) UpdateUser(id uint, req domain.UpdateUserRequest) (*domain.User, error) <span class="cov8" title="1">{
+        args := m.Called(id, req)
+        if args.Get(0) == nil </span><span class="cov0" title="0">{
+                return nil, args.Error(1)
+        }</span>
+        <span class="cov8" title="1">return args.Get(0).(*domain.User), args.Error(1)</span>
+}
+
+func (m *MockUserUseCase) DeleteUser(id uint) error <span class="cov8" title="1">{
+        args := m.Called(id)
+        return args.Error(0)
+}</span>
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package repository
+
+import (
+        "errors"
+
+        "gorm.io/gorm"
+        "kbtg.tech/ai-backend-workshop/internal/domain"
+        "kbtg.tech/ai-backend-workshop/pkg/database"
+)
+
+// userRepository implements the UserRepository interface
+type userRepository struct {
+        db *database.DB
+}
+
+// NewUserRepository creates a new user repository
+func NewUserRepository(db *database.DB) domain.UserRepository <span class="cov8" title="1">{
+        return &amp;userRepository{
+                db: db,
+        }
+}</span>
+
+// GetAll retrieves all users from the database
+func (r *userRepository) GetAll() ([]domain.User, error) <span class="cov8" title="1">{
+        var users []domain.User
+        if err := r.db.Find(&amp;users).Error; err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return users, nil</span>
+}
+
+// GetByID retrieves a user by ID
+func (r *userRepository) GetByID(id uint) (*domain.User, error) <span class="cov8" title="1">{
+        var user domain.User
+        if err := r.db.First(&amp;user, id).Error; err != nil </span><span class="cov8" title="1">{
+                if errors.Is(err, gorm.ErrRecordNotFound) </span><span class="cov8" title="1">{
+                        return nil, errors.New("user not found")
+                }</span>
+                <span class="cov0" title="0">return nil, err</span>
+        }
+        <span class="cov8" title="1">return &amp;user, nil</span>
+}
+
+// GetByEmail retrieves a user by email
+func (r *userRepository) GetByEmail(email string) (*domain.User, error) <span class="cov8" title="1">{
+        var user domain.User
+        if err := r.db.Where("email = ?", email).First(&amp;user).Error; err != nil </span><span class="cov8" title="1">{
+                if errors.Is(err, gorm.ErrRecordNotFound) </span><span class="cov8" title="1">{
+                        return nil, errors.New("user not found")
+                }</span>
+                <span class="cov0" title="0">return nil, err</span>
+        }
+        <span class="cov8" title="1">return &amp;user, nil</span>
+}
+
+// Create creates a new user in the database
+func (r *userRepository) Create(user *domain.User) error <span class="cov8" title="1">{
+        return r.db.Create(user).Error
+}</span>
+
+// Update updates an existing user in the database
+func (r *userRepository) Update(user *domain.User) error <span class="cov8" title="1">{
+        return r.db.Save(user).Error
+}</span>
+
+// Delete deletes a user by ID
+func (r *userRepository) Delete(id uint) error <span class="cov8" title="1">{
+        result := r.db.Delete(&amp;domain.User{}, id)
+        if result.Error != nil </span><span class="cov0" title="0">{
+                return result.Error
+        }</span>
+        <span class="cov8" title="1">if result.RowsAffected == 0 </span><span class="cov8" title="1">{
+                return errors.New("user not found")
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package usecase
+
+import (
+        "errors"
+
+        "kbtg.tech/ai-backend-workshop/internal/domain"
+        "kbtg.tech/ai-backend-workshop/pkg/database"
+)
+
+// userUseCase implements the UserUseCase interface
+type userUseCase struct {
+        userRepo domain.UserRepository
+}
+
+// NewUserUseCase creates a new user use case
+func NewUserUseCase(userRepo domain.UserRepository) domain.UserUseCase <span class="cov8" title="1">{
+        return &amp;userUseCase{
+                userRepo: userRepo,
+        }
+}</span>
+
+// GetAllUsers retrieves all users
+func (u *userUseCase) GetAllUsers() ([]domain.User, error) <span class="cov8" title="1">{
+        return u.userRepo.GetAll()
+}</span>
+
+// GetUserByID retrieves a user by ID
+func (u *userUseCase) GetUserByID(id uint) (*domain.User, error) <span class="cov8" title="1">{
+        if id == 0 </span><span class="cov8" title="1">{
+                return nil, errors.New("invalid user ID")
+        }</span>
+        <span class="cov8" title="1">return u.userRepo.GetByID(id)</span>
+}
+
+// CreateUser creates a new user
+func (u *userUseCase) CreateUser(req domain.CreateUserRequest) (*domain.User, error) <span class="cov8" title="1">{
+        // Validate required fields
+        if req.FirstName == "" || req.LastName == "" || req.Email == "" </span><span class="cov8" title="1">{
+                return nil, errors.New("first name, last name, and email are required")
+        }</span>
+
+        // Check if user with email already exists
+        <span class="cov8" title="1">existingUser, _ := u.userRepo.GetByEmail(req.Email)
+        if existingUser != nil </span><span class="cov8" title="1">{
+                return nil, errors.New("user with this email already exists")
+        }</span>
+
+        // Create new user
+        <span class="cov8" title="1">user := &amp;domain.User{
+                FirstName:      req.FirstName,
+                LastName:       req.LastName,
+                Email:          req.Email,
+                Phone:          req.Phone,
+                MembershipType: req.MembershipType,
+                Points:         req.Points,
+                MembershipID:   database.GenerateMembershipID(),
+        }
+
+        // Set default membership type if not provided
+        if user.MembershipType == "" </span><span class="cov0" title="0">{
+                user.MembershipType = "Bronze"
+        }</span>
+
+        <span class="cov8" title="1">err := u.userRepo.Create(user)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">return user, nil</span>
+}
+
+// UpdateUser updates an existing user
+func (u *userUseCase) UpdateUser(id uint, req domain.UpdateUserRequest) (*domain.User, error) <span class="cov8" title="1">{
+        if id == 0 </span><span class="cov0" title="0">{
+                return nil, errors.New("invalid user ID")
+        }</span>
+
+        // Get existing user
+        <span class="cov8" title="1">user, err := u.userRepo.GetByID(id)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        // Check if email is being changed to an existing email
+        <span class="cov8" title="1">if req.Email != "" &amp;&amp; req.Email != user.Email </span><span class="cov0" title="0">{
+                existingUser, _ := u.userRepo.GetByEmail(req.Email)
+                if existingUser != nil </span><span class="cov0" title="0">{
+                        return nil, errors.New("user with this email already exists")
+                }</span>
+                <span class="cov0" title="0">user.Email = req.Email</span>
+        }
+
+        // Update fields if provided
+        <span class="cov8" title="1">if req.FirstName != "" </span><span class="cov8" title="1">{
+                user.FirstName = req.FirstName
+        }</span>
+        <span class="cov8" title="1">if req.LastName != "" </span><span class="cov0" title="0">{
+                user.LastName = req.LastName
+        }</span>
+        <span class="cov8" title="1">if req.Phone != "" </span><span class="cov0" title="0">{
+                user.Phone = req.Phone
+        }</span>
+        <span class="cov8" title="1">if req.MembershipType != "" </span><span class="cov0" title="0">{
+                user.MembershipType = req.MembershipType
+        }</span>
+        <span class="cov8" title="1">if req.Points != 0 </span><span class="cov8" title="1">{
+                user.Points = req.Points
+        }</span>
+
+        <span class="cov8" title="1">err = u.userRepo.Update(user)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">return user, nil</span>
+}
+
+// DeleteUser deletes a user
+func (u *userUseCase) DeleteUser(id uint) error <span class="cov8" title="1">{
+        if id == 0 </span><span class="cov0" title="0">{
+                return errors.New("invalid user ID")
+        }</span>
+
+        // Check if user exists
+        <span class="cov8" title="1">_, err := u.userRepo.GetByID(id)
+        if err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return u.userRepo.Delete(id)</span>
+}
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package database
+
+import (
+        "fmt"
+        "log"
+        "time"
+
+        "gorm.io/driver/sqlite"
+        "gorm.io/gorm"
+        "kbtg.tech/ai-backend-workshop/internal/domain"
+)
+
+// DB holds the database connection
+type DB struct {
+        *gorm.DB
+}
+
+// NewDatabase creates a new database connection
+func NewDatabase(dbPath string) (*DB, error) <span class="cov0" title="0">{
+        db, err := gorm.Open(sqlite.Open(dbPath), &amp;gorm.Config{})
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to connect to database: %w", err)
+        }</span>
+
+        // Auto-migrate the User model
+        <span class="cov0" title="0">err = db.AutoMigrate(&amp;domain.User{})
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to migrate database: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">return &amp;DB{db}, nil</span>
+}
+
+// SeedData seeds the database with initial data
+func (db *DB) SeedData() error <span class="cov0" title="0">{
+        // Check if users already exist
+        var count int64
+        db.Model(&amp;domain.User{}).Count(&amp;count)
+        if count &gt; 0 </span><span class="cov0" title="0">{
+                return nil // Data already exists
+        }</span>
+
+        <span class="cov0" title="0">seedUsers := []domain.User{
+                {
+                        FirstName:      "สมชาย",
+                        LastName:       "ใจดี",
+                        Email:          "somchai@example.com",
+                        Phone:          "081-234-5678",
+                        MembershipType: "Gold",
+                        MembershipID:   "LBK001234",
+                        JoinDate:       time.Now().AddDate(-1, 0, 0), // 1 year ago
+                        Points:         15420,
+                },
+                {
+                        FirstName:      "สมหญิง",
+                        LastName:       "รักดี",
+                        Email:          "somying@example.com",
+                        Phone:          "089-765-4321",
+                        MembershipType: "Silver",
+                        MembershipID:   "LBK001235",
+                        JoinDate:       time.Now().AddDate(0, -6, 0), // 6 months ago
+                        Points:         8750,
+                },
+        }
+
+        for _, user := range seedUsers </span><span class="cov0" title="0">{
+                if err := db.Create(&amp;user).Error; err != nil </span><span class="cov0" title="0">{
+                        return fmt.Errorf("failed to seed user: %w", err)
+                }</span>
+        }
+
+        <span class="cov0" title="0">log.Println("Database seeded with initial users")
+        return nil</span>
+}
+
+// GenerateMembershipID generates a random membership ID
+func GenerateMembershipID() string <span class="cov8" title="1">{
+        return fmt.Sprintf("LBK%06d", time.Now().UnixNano()%999999)
+}</span>
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
