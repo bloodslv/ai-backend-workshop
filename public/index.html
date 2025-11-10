@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KBTG AI Backend Workshop</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .api-section {
+            margin: 2rem 0;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        .endpoint {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: white;
+            border-left: 4px solid #007bff;
+            border-radius: 3px;
+        }
+        .method {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 3px;
+            color: white;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+        .get { background-color: #28a745; }
+        .post { background-color: #007bff; }
+        .put { background-color: #ffc107; color: #212529; }
+        .delete { background-color: #dc3545; }
+        code {
+            background: #f1f3f4;
+            padding: 0.25rem 0.5rem;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 KBTG AI Backend Workshop</h1>
+        <p>Welcome to the KBTG AI Backend Workshop! This is a simple REST API built with Go and Fiber.</p>
+        
+        <div class="api-section">
+            <h2>Available Endpoints</h2>
+            
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <code>/api/v1/health</code>
+                <p>Health check endpoint</p>
+            </div>
+            
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <code>/api/v1/hello?name=YourName</code>
+                <p>Simple hello world endpoint with optional name parameter</p>
+            </div>
+            
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <code>/api/v1/users</code>
+                <p>Get all users</p>
+            </div>
+            
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <code>/api/v1/users/:id</code>
+                <p>Get a specific user by ID</p>
+            </div>
+            
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <code>/api/v1/users</code>
+                <p>Create a new user (send JSON: {"name": "Name", "email": "email@example.com"})</p>
+            </div>
+            
+            <div class="endpoint">
+                <span class="method put">PUT</span>
+                <code>/api/v1/users/:id</code>
+                <p>Update a user (send JSON: {"name": "New Name", "email": "newemail@example.com"})</p>
+            </div>
+            
+            <div class="endpoint">
+                <span class="method delete">DELETE</span>
+                <code>/api/v1/users/:id</code>
+                <p>Delete a user by ID</p>
+            </div>
+        </div>
+        
+        <div class="api-section">
+            <h2>Quick Test</h2>
+            <p>Try these links to test the API:</p>
+            <ul>
+                <li><a href="/api/v1/health" target="_blank">Health Check</a></li>
+                <li><a href="/api/v1/hello?name=KBTG" target="_blank">Hello KBTG</a></li>
+                <li><a href="/api/v1/users" target="_blank">Get All Users</a></li>
+                <li><a href="/api/v1/users/1" target="_blank">Get User 1</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
